@@ -1,5 +1,6 @@
 package fr.emevel.locallink.locallinkdesktop;
 
+import fr.emevel.locallink.server.LocalLinkClient;
 import fr.emevel.locallink.server.LocalLinkServer;
 import fr.emevel.locallink.server.LocalLinkServerData;
 import fr.emevel.locallink.server.ServerMain;
@@ -12,15 +13,18 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HelloApplication extends Application {
 
@@ -31,6 +35,12 @@ public class HelloApplication extends Application {
     public static Runnable dataSaver;
 
     public static VBox syncFolderList;
+
+    public static VBox clientList = new VBox();
+
+    private static final UpdateClientThread updateClientThread = new UpdateClientThread();
+
+    public static final List<ClientElement> clients = new ArrayList<>();
 
     ScrollPane setupScrollPane() throws IOException {
         ScrollPane scrollPane = new ScrollPane();
@@ -52,6 +62,22 @@ public class HelloApplication extends Application {
 
         scrollPane.setContent(syncFolderList);
         return scrollPane;
+    }
+
+    public static void addClient(LocalLinkClient client) {
+
+        System.out.println("Adding client " + client.getPrintableAddress());
+
+        ClientElement element = new ClientElement(client);
+        clients.add(element);
+    }
+
+    public static void removeClient(LocalLinkClient client) {
+        ClientElement element = clients.stream().filter(c -> c.client == client).findFirst().orElse(null);
+        if (element != null) {
+            clients.remove(element);
+            clientList.getChildren().remove(element.clientGrid);
+        }
     }
 
     @Override
@@ -105,37 +131,21 @@ public class HelloApplication extends Application {
         root.add(button, 7, 6);
 
 
-        GridPane clientGrid = new GridPane();
-        root.setHgap(5);
-        root.setVgap(10);
+        clientList.setPadding(new Insets(15,15,15,15));
 
-        Label label2 = new Label("My Phone (122.33.32.25)");
-        label2.setPadding(new Insets(0, 0, 10, 0));
-        label2.setFont(new javafx.scene.text.Font("Calibri", 16));
+        ScrollPane clientScroll = new ScrollPane();
+        clientScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        clientScroll.setFitToWidth(true);
+        //clientScroll.setPrefSize(410, 25 * 5);
+        //clientScroll.setMinSize(410, 25 * 5);
 
-        GridPane.setHalignment(label2, HPos.LEFT);
-        clientGrid.add(label2, 0, 0, 3, 1);
+        clientScroll.setContent(clientList);
 
-        Button button2 = new Button("Folders");
-        clientGrid.add(button2, 0, 1, 1, 1);
+        Label clientLabel = new Label("Connected clients: ");
 
-        for (int i = 0 ; i < 5 ; i++) {
-            Label label3 = new Label("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-            label3.setFont(new javafx.scene.text.Font("Calibri", 12));
-            label3.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
-            label3.setPrefWidth(100);
-            label3.setVisible(false);
-            clientGrid.add(label3, 0, 2 + i, 1, 1);
+        clientList.getChildren().add(clientLabel);
 
-            ProgressBar bar = new ProgressBar();
-            bar.setProgress(0.5);
-            bar.setVisible(false);
-
-            GridPane.setHalignment(bar, HPos.RIGHT);
-            clientGrid.add(bar, 1, 2 + i, 1, 1);
-        }
-
-        root.add(clientGrid, 0, 7, 3, 7);
+        root.add(clientScroll, 9, 0, 1, 9);
 
 
         Scene scene = new Scene(root, 800, 600);
@@ -148,6 +158,8 @@ public class HelloApplication extends Application {
     @Override
     public void stop() throws Exception {
         super.stop();
+
+        updateClientThread.stop();
 
         server.stop();
     }
@@ -164,9 +176,9 @@ public class HelloApplication extends Application {
             }
         };
 
-        server = new LocalLinkServer(data, dataSaver);
+        server = new DesktopLocalLinkServer(data, dataSaver);
 
-        //server.start();
+        server.start();
 
 
         launch();
