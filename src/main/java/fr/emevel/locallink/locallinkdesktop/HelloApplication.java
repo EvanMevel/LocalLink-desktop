@@ -1,10 +1,5 @@
 package fr.emevel.locallink.locallinkdesktop;
 
-import fr.emevel.locallink.server.LocalLinkServer;
-import fr.emevel.locallink.server.LocalLinkServerData;
-import fr.emevel.locallink.server.ServerMain;
-import fr.emevel.locallink.server.sync.LocalSyncFolder;
-import fr.emevel.locallink.server.sync.SyncFolder;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -13,24 +8,20 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.layout.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 public class HelloApplication extends Application {
 
-    public static LocalLinkServerData data;
-
-    public static LocalLinkServer server;
-
-    public static Runnable dataSaver;
-
     public static VBox syncFolderList;
+
+    private static final UploadBarThread uploadBarThread = new UploadBarThread();
 
     ScrollPane setupScrollPane() throws IOException {
         ScrollPane scrollPane = new ScrollPane();
@@ -42,13 +33,6 @@ public class HelloApplication extends Application {
 
         syncFolderList = new VBox();
         syncFolderList.setPadding(new Insets(15,15,15,15));
-
-        for (SyncFolder fo : data.getFolders().getFolders()) {
-            FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("test.fxml"));
-            fxmlLoader.setController(new SyncFolderController(fo));
-
-            syncFolderList.getChildren().add(fxmlLoader.load());
-        }
 
         scrollPane.setContent(syncFolderList);
         return scrollPane;
@@ -86,17 +70,14 @@ public class HelloApplication extends Application {
                 File file = fileChooser.showDialog(stage);
 
                 if (file != null) {
-                    LocalSyncFolder fo = new LocalSyncFolder(file);
                     FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("test.fxml"));
-                    fxmlLoader.setController(new SyncFolderController(fo));
+                    fxmlLoader.setController(new SyncFolderController(file));
 
                     try {
                         syncFolderList.getChildren().add(fxmlLoader.load());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                    data.getFolders().addFolder(fo);
-                    dataSaver.run();
                 }
             }
         });
@@ -119,17 +100,23 @@ public class HelloApplication extends Application {
         Button button2 = new Button("Folders");
         clientGrid.add(button2, 0, 1, 1, 1);
 
+        File f = new File("src/main/java/fr/emevel/locallink/locallinkdesktop");
+
+        File[] files = f.listFiles();
+
+        Random rand = new Random();
+
         for (int i = 0 ; i < 5 ; i++) {
-            Label label3 = new Label("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            Label label3 = new Label(files[i].getName());
             label3.setFont(new javafx.scene.text.Font("Calibri", 12));
             label3.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
             label3.setPrefWidth(100);
-            label3.setVisible(false);
             clientGrid.add(label3, 0, 2 + i, 1, 1);
 
             ProgressBar bar = new ProgressBar();
-            bar.setProgress(0.5);
-            bar.setVisible(false);
+            bar.setProgress(rand.nextDouble());
+
+            uploadBarThread.addBar(bar);
 
             GridPane.setHalignment(bar, HPos.RIGHT);
             clientGrid.add(bar, 1, 2 + i, 1, 1);
@@ -148,25 +135,10 @@ public class HelloApplication extends Application {
     @Override
     public void stop() throws Exception {
         super.stop();
-
-        server.stop();
+        uploadBarThread.stop();
     }
 
     public static void main(String[] args) throws Exception {
-
-        data = ServerMain.loadDataFromFile(new File("server.dat"));
-
-        dataSaver = () -> {
-            try {
-                ServerMain.saveDataToFile(data, new File("server.dat"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        };
-
-        server = new LocalLinkServer(data, dataSaver);
-
-        //server.start();
 
 
         launch();
