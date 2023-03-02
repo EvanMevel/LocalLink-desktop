@@ -2,6 +2,9 @@ package fr.emevel.locallink.locallinkdesktop;
 
 import fr.emevel.locallink.server.LocalLinkClient;
 import fr.emevel.locallink.server.sync.FileSender;
+import fr.emevel.locallink.server.sync.SyncFolder;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -31,8 +34,30 @@ public class ClientElement {
         GridPane.setHalignment(clientName, HPos.LEFT);
         clientGrid.add(clientName, 0, 0, 3, 1);
 
-        Button button2 = new Button("Folders");
+        Button button2 = new Button("Add Folder");
         clientGrid.add(button2, 0, 1, 1, 1);
+        button2.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                AskFolder askFolder = new AskFolder();
+
+                SyncFolder folder = askFolder.ask();
+
+                if (folder == null) {
+                    return;
+                }
+
+                AskClientFolder askClientFolder = new AskClientFolder(client);
+
+                String clientFolder = askClientFolder.ask();
+
+                if (clientFolder == null) {
+                    return;
+                }
+
+                client.createLink(folder.getUuid(), clientFolder);
+            }
+        });
 
         for (int i = 0 ; i < 5 ; i++) {
             Label fileName = new Label("File");
