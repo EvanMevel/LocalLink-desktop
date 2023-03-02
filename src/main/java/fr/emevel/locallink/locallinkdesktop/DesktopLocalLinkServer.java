@@ -17,13 +17,13 @@ public class DesktopLocalLinkServer extends LocalLinkServer {
     @Override
     protected void clientDisconnected(LinkSocket client) {
         LocalLinkClient cli = (LocalLinkClient) client;
-        HelloApplication.removeClient(cli);
+        LocalLinkDesktop.removeClient(cli);
     }
 
     @Override
     protected LinkSocket createClient(Socket sock) throws IOException {
         LocalLinkClient cli = (LocalLinkClient) super.createClient(sock);
-        HelloApplication.addClient(cli);
+        LocalLinkDesktop.addClient(cli);
         return cli;
     }
 }

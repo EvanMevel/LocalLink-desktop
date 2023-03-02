@@ -66,7 +66,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                fr.emevel.locallink.locallinkdesktop/fr.emevel.locallink.locallinkdesktop.HelloApplication
+                                fr.emevel.locallink.locallinkdesktop/fr.emevel.locallink.locallinkdesktop.LocalLinkDesktop
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

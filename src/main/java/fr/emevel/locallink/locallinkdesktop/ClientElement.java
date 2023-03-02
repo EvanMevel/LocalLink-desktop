@@ -20,7 +20,7 @@ import java.util.List;
 public class ClientElement {
 
     GridPane clientGrid = new GridPane();
-    Label clientName = new Label("...");
+    Label clientName;
     LocalLinkClient client;
 
     List<Pair<Label, ProgressBar>> progressBars = new ArrayList<>(5);
@@ -28,29 +28,26 @@ public class ClientElement {
     public ClientElement(LocalLinkClient client) {
         this.client = client;
 
+        /* TITLE */
+        clientName = MainPanel.createTitle("...");
         clientName.setPadding(new Insets(0, 0, 10, 0));
-        clientName.setFont(new javafx.scene.text.Font("Calibri", 16));
-
         GridPane.setHalignment(clientName, HPos.LEFT);
         clientGrid.add(clientName, 0, 0, 3, 1);
 
+        /* ADD FOLDER BUTTON */
         Button button2 = new Button("Add Folder");
         clientGrid.add(button2, 0, 1, 1, 1);
         button2.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 AskFolder askFolder = new AskFolder();
-
                 SyncFolder folder = askFolder.ask();
-
                 if (folder == null) {
                     return;
                 }
 
                 AskClientFolder askClientFolder = new AskClientFolder(client);
-
                 String clientFolder = askClientFolder.ask();
-
                 if (clientFolder == null) {
                     return;
                 }
@@ -59,9 +56,9 @@ public class ClientElement {
             }
         });
 
+        /* PROGRESS BARS */
         for (int i = 0 ; i < 5 ; i++) {
-            Label fileName = new Label("File");
-            fileName.setFont(new javafx.scene.text.Font("Calibri", 12));
+            Label fileName = MainPanel.createText("File");
             fileName.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
             fileName.setPrefWidth(100);
             fileName.setVisible(false);

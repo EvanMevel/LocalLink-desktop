@@ -17,12 +17,7 @@ public class UpdateClientThread {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        for (ClientElement client : HelloApplication.clients) {
-
-                            if (!HelloApplication.clientList.getChildren().contains(client.clientGrid)) {
-                                HelloApplication.clientList.getChildren().add(client.clientGrid);
-                            }
-
+                        for (ClientElement client : LocalLinkDesktop.clients) {
                             client.update();
                         }
                     }
