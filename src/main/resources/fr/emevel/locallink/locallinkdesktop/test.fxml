@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="365.0" spacing="10.0" style="-fx-border-color: black; -fx-border-width: 1; -fx-border-style: solid;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+   <Label fx:id="filePath" prefHeight="20.0" prefWidth="330.0" text="C:/User/testzezeae:za/e:za:e/zeaeza/aaa" textOverrun="LEADING_ELLIPSIS">
+      <font>
+         <Font name="Calibri" size="14.0" />
+      </font>
+   </Label>
+   <ImageView fx:id="deleteImage" fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true" />
+</HBox>
