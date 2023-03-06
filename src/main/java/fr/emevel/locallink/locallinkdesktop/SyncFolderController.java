@@ -31,8 +31,8 @@ public class SyncFolderController {
     }
 
     public void onDeleteClick() {
-        LocalLinkDesktop.data.getFolders().removeFolder(fp);
-        LocalLinkDesktop.dataSaver.run();
+        LocalLinkDesktop.serverData.getFolders().removeFolder(fp);
+        LocalLinkDesktop.saveServerData.run();
 
         LocalLinkDesktop.mainPanel.syncFolderList.getChildren().remove(deleteImage.getParent());
     }

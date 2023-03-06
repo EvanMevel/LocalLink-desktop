@@ -29,7 +29,7 @@ public class AskFolder {
 
         ObservableList<SyncFolderElement> folders = FXCollections.observableArrayList();
 
-        for (SyncFolder fo : LocalLinkDesktop.data.getFolders().getFolders()) {
+        for (SyncFolder fo : LocalLinkDesktop.serverData.getFolders().getFolders()) {
             folders.add(new SyncFolderElement(fo));
         }
 

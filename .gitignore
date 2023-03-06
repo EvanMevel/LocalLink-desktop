@@ -38,3 +38,5 @@ build/
 .DS_Store
 
 server.dat
+client.dat
+folder/

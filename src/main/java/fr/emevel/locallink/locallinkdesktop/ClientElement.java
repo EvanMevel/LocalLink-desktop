@@ -52,7 +52,7 @@ public class ClientElement {
                     return;
                 }
 
-                client.createLink(folder.getUuid(), clientFolder);
+                client.createLink(folder, clientFolder);
             }
         });
 

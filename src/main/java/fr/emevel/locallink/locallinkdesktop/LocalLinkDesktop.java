@@ -1,9 +1,10 @@
 package fr.emevel.locallink.locallinkdesktop;
 
+import fr.emevel.locallink.client.LocalLinkClientData;
+import fr.emevel.locallink.network.DataSaving;
 import fr.emevel.locallink.server.LocalLinkClient;
 import fr.emevel.locallink.server.LocalLinkServer;
 import fr.emevel.locallink.server.LocalLinkServerData;
-import fr.emevel.locallink.server.ServerMain;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -16,9 +17,13 @@ import java.util.List;
 
 public class LocalLinkDesktop extends Application {
 
-    public static LocalLinkServerData data;
+    public static LocalLinkServerData serverData;
+    public static Runnable saveServerData;
     public static LocalLinkServer server;
-    public static Runnable dataSaver;
+
+    public static LocalLinkClientData clientData;
+    public static Runnable saveClientData;
+    public static fr.emevel.locallink.client.LocalLinkClient client;
 
     public static final List<ClientElement> clients = new ArrayList<>();
     private static final UpdateClientThread updateClientThread = new UpdateClientThread();
@@ -46,7 +51,7 @@ public class LocalLinkDesktop extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        mainPanel = new MainPanel(stage, data, dataSaver);
+        mainPanel = new MainPanel(stage, serverData, saveServerData);
 
         Scene scene = new Scene(mainPanel.root, 800, 600);
 
@@ -62,22 +67,30 @@ public class LocalLinkDesktop extends Application {
         updateClientThread.stop();
 
         server.stop();
+
+        client.stop();
     }
 
     public static void main(String[] args) throws Exception {
-        data = ServerMain.loadDataFromFile(new File("server.dat"));
 
-        dataSaver = () -> {
-            try {
-                ServerMain.saveDataToFile(data, new File("server.dat"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        };
+        DataSaving<LocalLinkServerData> dataSaver =  DataSaving.localFile(new File("server.dat"));
+        serverData = dataSaver.load(LocalLinkServerData::new);
+        saveServerData = dataSaver.saver(serverData);
 
-        server = new DesktopLocalLinkServer(data, dataSaver);
+        DataSaving<LocalLinkClientData> clientDataSaver = DataSaving.localFile(new File("client.dat"));
+        clientData = clientDataSaver.load(LocalLinkClientData::new);
+        saveClientData = clientDataSaver.saver(clientData);
 
+        if (!clientData.getUuid().equals(serverData.getUuid())) {
+            clientData.setUuid(serverData.getUuid());
+            saveClientData.run();
+        }
+
+        server = new DesktopLocalLinkServer(serverData, saveServerData);
         server.start();
+
+        client = new fr.emevel.locallink.client.LocalLinkClient(clientData, new File("."), saveClientData);
+        client.start();
 
         launch();
     }
