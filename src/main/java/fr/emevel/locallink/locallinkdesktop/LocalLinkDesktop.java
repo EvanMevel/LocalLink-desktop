@@ -8,6 +8,7 @@ import fr.emevel.locallink.server.LocalLinkServerData;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -52,6 +53,9 @@ public class LocalLinkDesktop extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         mainPanel = new MainPanel(stage, serverData, saveServerData);
+
+        Image icon = new Image(getClass().getResourceAsStream("logo.png"));
+        stage.getIcons().add(icon);
 
         Scene scene = new Scene(mainPanel.root, 800, 600);
 
